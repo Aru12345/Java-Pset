@@ -17,6 +17,7 @@ class MyWindow extends JFrame {
     private JButton[][] btngrid = new JButton[1][16];
     private JButton shuffle = new JButton("Shuffle");
     private JButton exit = new JButton("Exit");
+    private JLabel level=new JLabel("");
 
     public MyWindow() {
     }
@@ -38,7 +39,7 @@ class MyWindow extends JFrame {
         }
         btngrid[0][15].setText("");
         onePanel.add(btngrid[0][15]);
-
+        twoPanel.add(level);
         twoPanel.add(shuffle);
         twoPanel.add(exit);
 
@@ -65,8 +66,27 @@ class MyWindow extends JFrame {
         });
 
         shuffle.addActionListener(new ActionListener(){
+            private int count = 0;
             public void actionPerformed(ActionEvent e){
-                    performShuffles(getBlankButton());
+                    if(count ==0){
+                        for(int i =0;i<3;i++){
+                        performShuffles(getBlankButton());
+                        }
+                    level.setText("Easy Level");
+                        count++;
+                    }else if(count==1){
+                        for(int i =0;i<3;i++){
+                            performShuffles(getBlankButton());
+                        }
+                        level.setText("Medium Level");
+                        count++;
+                    }else{
+                        for(int i =0;i<3;i++){
+                            performShuffles(getBlankButton());
+                        }
+                        level.setText("Hard Level");
+                        count++;
+                    }
             }
 
         });
