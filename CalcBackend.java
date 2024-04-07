@@ -27,18 +27,19 @@
 //@@ ADDITIONCHAR =       '+',
 //@@ SUBTRACTIONCHAR =    '-';
 
-
 public class CalcBackend {
     private double displayVal;
     private double currentVal;
     private char currentOperator;
     private boolean clearDisplay;
+    private boolean hasDecimal;
 
     public CalcBackend() {
         displayVal = 0;
         currentVal = 0;
         currentOperator = ' ';
         clearDisplay = false;
+        hasDecimal = false;
     }
 
     public void feedChar(char c) {
@@ -50,7 +51,10 @@ public class CalcBackend {
         if (Character.isDigit(c)) {
             displayVal = displayVal * 10 + Character.getNumericValue(c);
         } else if (c == '.') {
-            // Handle decimal point
+            if (!hasDecimal) {
+                displayVal += 0.0; // Add decimal point only once
+                hasDecimal = true;
+            }
         } else if (c == '+' || c == '-' || c == '*' || c == '/') {
             if (currentOperator != ' ') {
                 calculate();
@@ -58,15 +62,26 @@ public class CalcBackend {
             currentVal = displayVal;
             currentOperator = c;
             clearDisplay = true;
+            hasDecimal = false; // Reset decimal flag
         } else if (c == '=') {
             calculate();
             currentOperator = ' ';
             clearDisplay = true;
+            hasDecimal = false; // Reset decimal flag
         } else if (c == 'C') {
             displayVal = 0;
             currentVal = 0;
             currentOperator = ' ';
             clearDisplay = false;
+            hasDecimal = false; // Reset decimal flag
+        } else if (c == '√') {
+            if (displayVal >= 0) {
+                displayVal = Math.sqrt(displayVal);
+            } else {
+                displayVal = Double.NaN;
+            }
+            clearDisplay = true;
+            hasDecimal = displayVal % 1 != 0;
         }
     }
 
@@ -82,7 +97,11 @@ public class CalcBackend {
                 displayVal = currentVal * displayVal;
                 break;
             case '/':
-                displayVal = currentVal / displayVal;
+                if (displayVal != 0) {
+                    displayVal = currentVal / displayVal;
+                } else {
+                    displayVal = Double.POSITIVE_INFINITY;
+                }
                 break;
         }
     }

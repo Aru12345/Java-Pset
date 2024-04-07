@@ -6,7 +6,7 @@ public class Calculator {
     public static void main(String[] args) {
         MyWindow window = new MyWindow();
         window.setTitle("Calculator");
-        window.setSize(400, 600);
+        window.setSize(300, 400);
         window.setVisible(true);
     }
 }
@@ -15,9 +15,6 @@ class MyWindow extends JFrame {
     private JPanel view = new JPanel();
     private JLabel displayLabel = new JLabel("0.0");
     private JPanel buttonPanel = new JPanel();
-    private JButton[] buttons = new JButton[18];
-    private String[] buttonLabels = { "0", "1", "2", "3", "4", "5", "6", "7", "8",
-            "9", "C", "√", "/", "*", "-", ".", "+", "=" };
 
     public MyWindow() {
 
