@@ -33,56 +33,66 @@ public class CalcBackend {
     private char currentOperator;
     private boolean clearDisplay;
     private boolean hasDecimal;
+    private double previousResult; // Variable to store the previous result
 
     public CalcBackend() {
-        displayVal = 0;
-        currentVal = 0;
+        displayVal = 0.0;
+        currentVal = 0.0;
         currentOperator = ' ';
         clearDisplay = false;
         hasDecimal = false;
+        previousResult = 0.0; // Initialize previousResult to 0.0
     }
 
     public void feedChar(char c) {
         if (clearDisplay) {
-            displayVal = 0;
+            displayVal = 0.0;
             clearDisplay = false;
         }
 
         if (Character.isDigit(c)) {
-            displayVal = displayVal * 10 + Character.getNumericValue(c);
+            handleDigitInput(c);
         } else if (c == '.') {
-            if (!hasDecimal) {
-                displayVal += 0.0; // Add decimal point only once
-                hasDecimal = true;
-            }
+            hasDecimal = true;
         } else if (c == '+' || c == '-' || c == '*' || c == '/') {
-            if (currentOperator != ' ') {
-                calculate();
-            }
-            currentVal = displayVal;
-            currentOperator = c;
-            clearDisplay = true;
-            hasDecimal = false; // Reset decimal flag
+            handleOperatorInput(c);
         } else if (c == '=') {
-            calculate();
-            currentOperator = ' ';
-            clearDisplay = true;
-            hasDecimal = false; // Reset decimal flag
-        } else if (c == 'C') {
-            displayVal = 0;
-            currentVal = 0;
-            currentOperator = ' ';
-            clearDisplay = false;
-            hasDecimal = false; // Reset decimal flag
-        } else if (c == '√') {
-            if (displayVal >= 0) {
-                displayVal = Math.sqrt(displayVal);
+            if (currentOperator == '=') {
+                // Repeat the previous result without performing a new calculation
+                displayVal = previousResult;
             } else {
-                displayVal = Double.NaN;
+                calculate();
+                previousResult = displayVal; // Remember the current result
+                currentOperator = '='; // Update the current operator to '='
             }
             clearDisplay = true;
-            hasDecimal = displayVal % 1 != 0;
+            hasDecimal = false; // Reset hasDecimal after calculation
+        } else if (c == 'C') {
+            clear();
+        } else if (c == '\u221A') {
+            handleSquareRoot();
         }
+    }
+
+    private void handleDigitInput(char c) {
+        if (!hasDecimal) {
+            int intValue = Character.getNumericValue(c);
+            displayVal = displayVal * 10 + intValue;
+        } else {
+            int numDigitsAfterDecimal = getNumDigitsAfterDecimal();
+            double digitValue = Character.getNumericValue(c) * Math.pow(10, -numDigitsAfterDecimal);
+            displayVal += digitValue;
+        }
+    }
+
+    private void handleOperatorInput(char c) {
+        if (currentOperator != ' ') {
+            calculate();
+        }
+        currentVal = displayVal;
+        currentOperator = c;
+        clearDisplay = true;
+        hasDecimal = false; // Reset hasDecimal when operator is entered
     }
 
     private void calculate() {
@@ -94,10 +104,17 @@ public class CalcBackend {
                 displayVal = currentVal - displayVal;
                 break;
             case '*':
-                displayVal = currentVal * displayVal;
+                // Check if either operand has a decimal
+                boolean hasDecimal = hasDecimal(currentVal) || hasDecimal(displayVal);
+                if (hasDecimal) {
+                    displayVal = currentVal * displayVal;
+                } else {
+                    // Multiply whole numbers
+                    displayVal = Math.round(currentVal * displayVal * 100.0) / 100.0;
+                }
                 break;
             case '/':
-                if (displayVal != 0) {
+                if (displayVal != 0.0) {
                     displayVal = currentVal / displayVal;
                 } else {
                     displayVal = Double.POSITIVE_INFINITY;
@@ -106,7 +123,39 @@ public class CalcBackend {
         }
     }
 
+    private void handleSquareRoot() {
+        if (displayVal >= 0) {
+            double result = Math.sqrt(displayVal);
+            displayVal = result;
+        } else {
+            displayVal = Double.NaN; // Return NaN for square root of negative number
+        }
+        clearDisplay = true;
+        hasDecimal = false; // Reset hasDecimal after square root operation
+    }
+
+    private void clear() {
+        displayVal = 0.0;
+        currentVal = 0.0;
+        currentOperator = ' ';
+        clearDisplay = false;
+        hasDecimal = false;
+    }
+
+    private int getNumDigitsAfterDecimal() {
+        String valStr = Double.toString(displayVal);
+        int dotIndex = valStr.indexOf('.');
+        if (dotIndex == -1) {
+            return 0;
+        }
+        return valStr.length() - dotIndex - 1;
+    }
+
+    private boolean hasDecimal(double num) {
+        return num % 1 != 0;
+    }
+
     public String getDisplayVal() {
-        return String.valueOf(displayVal);
+        return Double.toString(displayVal);
     }
 }
