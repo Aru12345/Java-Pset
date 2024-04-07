@@ -18,6 +18,8 @@ class MyWindow extends JFrame {
     private JButton shuffle = new JButton("Shuffle");
     private JButton exit = new JButton("Exit");
     private JLabel level=new JLabel("");
+    private boolean shuffleOccured = false;
+
 
     public MyWindow() {
     }
@@ -26,6 +28,7 @@ class MyWindow extends JFrame {
         super(title);
         layoutComponents();
         addListeners();
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(500, 400);
     }
@@ -48,15 +51,26 @@ class MyWindow extends JFrame {
     }
 
     private void addListeners() {
+
+        
+       
         for (int i = 0; i < 16; i++) {
            // final int index = i;
             btngrid[0][i].addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     JButton clickedButton = (JButton) e.getSource();
+                   // methodClicked=clickedButton;
                     JButton blankButton = getBlankButton();
+                   // methodBlank=blankButton;
                     checkSwap(clickedButton, blankButton);
+                    
                 }
+
+          
+                
             });
+
+            
         }
 
         exit.addActionListener(new ActionListener(){
@@ -66,29 +80,36 @@ class MyWindow extends JFrame {
         });
 
         shuffle.addActionListener(new ActionListener(){
+       
             private int count = 0;
             public void actionPerformed(ActionEvent e){
                     if(count ==0){
-                        for(int i =0;i<3;i++){
+                        for(int i =0;i<1;i++){
                         performShuffles(getBlankButton());
+                      
                         }
-                    level.setText("Easy Level");
+                          shuffleOccured = true;
+                    level.setText("Easy Level.");
                         count++;
                     }else if(count==1){
-                        for(int i =0;i<3;i++){
+                        for(int i =0;i<2;i++){
                             performShuffles(getBlankButton());
                         }
-                        level.setText("Medium Level");
+                          shuffleOccured = true;
+                        level.setText("Medium Level.");
+                        //afterShuffle((JButton) e.getSource();,getBlankButton());
                         count++;
                     }else{
                         for(int i =0;i<3;i++){
                             performShuffles(getBlankButton());
                         }
+                          shuffleOccured = true;
                         level.setText("Hard Level");
+                       // afterShuffle((JButton) e.getSource();,getBlankButton());
                         count++;
-                    }
+                    }     
             }
-
+     
         });
 
     }
@@ -103,6 +124,7 @@ class MyWindow extends JFrame {
     }
 
     private void checkSwap(JButton clicked, JButton blank) {
+      
         int clickedRow = -1;
         int clickedCol = -1;
         int blankRow = -1;
@@ -126,8 +148,13 @@ class MyWindow extends JFrame {
             String tempText = clicked.getText();
             clicked.setText(blank.getText());
             blank.setText(tempText);
+
+        
         }
 
+        if(shuffleOccured == true){
+            afterShuffle();
+        }
 
     }
 
@@ -174,5 +201,28 @@ class MyWindow extends JFrame {
     return (Math.abs(row - blankRow) == 1 && col == blankCol) || (Math.abs(col - blankCol) == 1 && row == blankRow);
 
    }
+
+        private void afterShuffle(){
+      boolean iteration = true;
+      for(int i = 0;i<16;i++){
+            
+            if(btngrid[0][i].getText()!=""){
+                int value =Integer.valueOf(btngrid[0][i].getText());
+          
+            if(value==i+1){
+                iteration = true;
+            }else{
+                iteration=false;
+            }
+            }
+        }
+         if(iteration==true){
+            level.setText("Congratulations! You completed the game.");
+        }    
+
+   }
+   
+
+   
     
 }
