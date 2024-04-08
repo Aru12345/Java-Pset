@@ -75,13 +75,15 @@ public class CalcBackend {
     }
 
     private void handleDigitInput(char c) {
-        if (!hasDecimal) {
-            int intValue = Character.getNumericValue(c);
-            displayVal = displayVal * 10 + intValue;
+        if (c == '.') {
+            hasDecimal = true;
+        } else if (!hasDecimal) {
+            displayVal = displayVal * 10 + Character.getNumericValue(c);
         } else {
+            // Calculate the position of the new digit after the decimal point
             int numDigitsAfterDecimal = getNumDigitsAfterDecimal();
-            double digitValue = Character.getNumericValue(c) * Math.pow(10, -numDigitsAfterDecimal);
-            displayVal += digitValue;
+            // Adjust the display value based on the position of the new digit
+            displayVal = displayVal + Character.getNumericValue(c) * Math.pow(10, -numDigitsAfterDecimal);
         }
     }
 
@@ -104,32 +106,33 @@ public class CalcBackend {
                 displayVal = currentVal - displayVal;
                 break;
             case '*':
-                // Check if either operand has a decimal
-                boolean hasDecimal = hasDecimal(currentVal) || hasDecimal(displayVal);
-                if (hasDecimal) {
-                    displayVal = currentVal * displayVal;
-                } else {
-                    // Multiply whole numbers
-                    displayVal = Math.round(currentVal * displayVal * 100.0) / 100.0;
-                }
+                displayVal = currentVal * displayVal;
                 break;
             case '/':
                 if (displayVal != 0.0) {
                     displayVal = currentVal / displayVal;
                 } else {
-                    displayVal = Double.POSITIVE_INFINITY;
+                    // Handle division by zero
+                    if (currentVal > 0) {
+                        displayVal = Double.POSITIVE_INFINITY;
+                    } else if (currentVal < 0) {
+                        displayVal = Double.NEGATIVE_INFINITY;
+                    } else {
+                        displayVal = Double.NaN;
+                    }
                 }
                 break;
         }
     }
 
     private void handleSquareRoot() {
-        if (displayVal >= 0) {
-            double result = Math.sqrt(displayVal);
+        if (currentVal >= 0) {
+            double result = Math.sqrt(currentVal);
             displayVal = result;
         } else {
-            displayVal = Double.NaN; // Return NaN for square root of negative number
+            displayVal = Double.NaN; // Square root of negative number
         }
+
         clearDisplay = true;
         hasDecimal = false; // Reset hasDecimal after square root operation
     }
@@ -151,11 +154,12 @@ public class CalcBackend {
         return valStr.length() - dotIndex - 1;
     }
 
-    private boolean hasDecimal(double num) {
-        return num % 1 != 0;
+    public String getDisplayVal() {
+        if (Double.isNaN(displayVal)) {
+            return "NaN";
+        } else {
+            return Double.toString(displayVal);
+        }
     }
 
-    public String getDisplayVal() {
-        return Double.toString(displayVal);
-    }
 }
