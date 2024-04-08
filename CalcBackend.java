@@ -77,51 +77,63 @@ public class CalcBackend {
     private void handleDigitInput(char c) {
         if (c == '.') {
             hasDecimal = true;
-        } else if (!hasDecimal) {
-            displayVal = displayVal * 10 + Character.getNumericValue(c);
         } else {
-            // Calculate the position of the new digit after the decimal point
-            int numDigitsAfterDecimal = getNumDigitsAfterDecimal();
-            // Adjust the display value based on the position of the new digit
-            displayVal = displayVal + Character.getNumericValue(c) * Math.pow(10, -numDigitsAfterDecimal);
+            if (!hasDecimal) {
+                displayVal = displayVal * 10 + Character.getNumericValue(c);
+            } else {
+                // Calculate the position of the new digit after the decimal point
+                int numDigitsAfterDecimal = getNumDigitsAfterDecimal();
+                // Adjust the display value based on the position of the new digit
+                displayVal = displayVal + Character.getNumericValue(c) * Math.pow(10, -numDigitsAfterDecimal);
+            }
         }
     }
 
     private void handleOperatorInput(char c) {
         if (currentOperator != ' ') {
-            calculate();
+            // If the operator is entered without a second operand, repeat the previous
+            // calculation
+            if (!clearDisplay) { // here
+                calculate();
+            }
         }
+
         currentVal = displayVal;
+
         currentOperator = c;
         clearDisplay = true;
         hasDecimal = false; // Reset hasDecimal when operator is entered
     }
 
     private void calculate() {
-        switch (currentOperator) {
-            case '+':
-                displayVal = currentVal + displayVal;
-                break;
-            case '-':
-                displayVal = currentVal - displayVal;
-                break;
-            case '*':
-                displayVal = currentVal * displayVal;
-                break;
-            case '/':
-                if (displayVal != 0.0) {
-                    displayVal = currentVal / displayVal;
-                } else {
-                    // Handle division by zero
-                    if (currentVal > 0) {
-                        displayVal = Double.POSITIVE_INFINITY;
-                    } else if (currentVal < 0) {
-                        displayVal = Double.NEGATIVE_INFINITY;
+        if (currentOperator != '=' && currentOperator != ' ') {
+            switch (currentOperator) {
+                case '+':
+                    displayVal = currentVal + displayVal;
+                    break;
+                case '-':
+                    displayVal = currentVal - displayVal;
+                    break;
+                case '*':
+                    // Multiply the currentVal by displayVal
+                    displayVal = currentVal * displayVal;
+                    break;
+                case '/':
+                    if (displayVal != 0.0) {
+                        displayVal = currentVal / displayVal;
                     } else {
-                        displayVal = Double.NaN;
+                        // Handle division by zero
+                        if (currentVal > 0) {
+                            displayVal = Double.POSITIVE_INFINITY;
+                        } else if (currentVal < 0) {
+                            displayVal = Double.NEGATIVE_INFINITY;
+                        } else {
+                            displayVal = Double.NaN;
+                        }
                     }
-                }
-                break;
+                    break;
+            }
+            currentVal = displayVal; // Update currentVal for subsequent operations
         }
     }
 
